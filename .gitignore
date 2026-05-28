@@ -1,0 +1,6 @@
+.pio
+.vscode
+.vscode/c_cpp_properties.json
+.vscode/launch.json
+.vscode/ipch
+ozone/mkl25z4_template.jdebug.user
