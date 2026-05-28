@@ -100,22 +100,24 @@ void digitalWrite(int pin, Ports port, PinState state){
 int digitalRead(int pin, Ports port){
     switch(port){
         case A:
-            return (GPIOA->PDIR >> pin) & 1;
+            return !((GPIOA->PDIR >> pin) & 1);
         case B:
-            return (GPIOB->PDIR >> pin) & 1;
+            return !((GPIOB->PDIR >> pin) & 1);
         case C:
-            return (GPIOC->PDIR >> pin) & 1;
+            return !((GPIOB->PDIR >> pin) & 1);
         case D:
-            return (GPIOD->PDIR >> pin) & 1;
+            return !((GPIOB->PDIR >> pin) & 1);
         case E:
-            return (GPIOE->PDIR >> pin) & 1;
+            return !((GPIOB->PDIR >> pin) & 1);
     }
     return -1; // Invalid port
 }
 
-unsigned long millis(void){
-    // This function should return the number of milliseconds since the program started.
-    // You would need to set up a timer to increment a counter every millisecond.
-    // For simplicity, this is just a placeholder and does not provide actual timing functionality.
-    return 0;
+void myDelay(unsigned long ms){
+    for (unsigned long i = 0; i < ms; i++){
+        for(int j = 0; j < 5000; j++){
+            __NOP();
+        }
+    }
+    
 }

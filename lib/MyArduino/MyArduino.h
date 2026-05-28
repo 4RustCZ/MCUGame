@@ -22,6 +22,6 @@ typedef enum {
 void pinMode(int pin, Ports port, PinType mode);
 void digitalWrite(int pin, Ports port, PinState state);
 int digitalRead(int pin, Ports port);
-unsigned long millis(void);
+void myDelay(unsigned long ms);
 
 #endif
