@@ -22,67 +22,70 @@ void initSysTick(void);
 //void buttonHandler(void);
 int myRandom(int min, int max);
 
-int array[8] = {0,0,0,0,0,0,0,0};
-int simonCount = 0;
+
 unsigned long seed;
-GameState gameState = WAITING;
+
 
 __attribute__ ((weak)) int main(void)
 {
-	
-	
+	int array[8] = {0,0,0,0,0,0,0,0};
+	GameState gameState = WAITING;
+	int simonCount = 0;
 
 	wdog_init(WDOG_CONF_DIS); // this fuh ass thing
 	initPins();
-	//initNVIC();
-	//initTPM();
 	initSysTick();
 
 	while (1) {
-		while((GPIOA->PDIR & (1 << 4))&&(gameState == 0)){
-			seed = SysTick->VAL;
+		if(gameState==WAITING){
+			if(!(GPIOA->PDIR & (1 << 4))){
+				seed = SysTick->VAL;
+				gameState = PLAYING;
+			}
 		}
 
-		gameState = 1;
+		if(gameState == PLAYING){
+			simonCount = myRandom(1, 4);
 
-		simonCount = myRandom(1, 4);
-
-		switch (simonCount)
-		{
-		case 1:
-			digitalWrite(8,B,ON);
-			digitalWrite(9,B,ON);
-			heavyFunction();
-			digitalWrite(8,B,OFF);
-			digitalWrite(9,B,OFF);
-			heavyFunction();
-			break;
-		case 2:
-			digitalWrite(10,B,ON);
-			digitalWrite(11,B,ON);
-			heavyFunction();
-			digitalWrite(10,B,OFF);
-			digitalWrite(11,B,OFF);
-			heavyFunction();
-			break;
-		case 3:
-			digitalWrite(10,C,ON);
-			digitalWrite(11,C,ON);
-			heavyFunction();
-			digitalWrite(10,C,OFF);
-			digitalWrite(11,C,OFF);
-			heavyFunction();
-			break;
-		case 4:
-			digitalWrite(12,C,ON);
-			digitalWrite(13,C,ON);
-			heavyFunction();
-			digitalWrite(12,C,OFF);
-			digitalWrite(13,C,OFF);
-			heavyFunction();
-		default:
-			break;
+			switch (simonCount)
+			{
+			case 1:
+				digitalWrite(8,B,ON);
+				digitalWrite(9,B,ON);
+				heavyFunction();
+				digitalWrite(8,B,OFF);
+				digitalWrite(9,B,OFF);
+				heavyFunction();
+				break;
+			case 2:
+				digitalWrite(10,B,ON);
+				digitalWrite(11,B,ON);
+				heavyFunction();
+				digitalWrite(10,B,OFF);
+				digitalWrite(11,B,OFF);
+				heavyFunction();
+				break;
+			case 3:
+				digitalWrite(10,C,ON);
+				digitalWrite(11,C,ON);
+				heavyFunction();
+				digitalWrite(10,C,OFF);
+				digitalWrite(11,C,OFF);
+				heavyFunction();
+				break;
+			case 4:
+				digitalWrite(12,C,ON);
+				digitalWrite(13,C,ON);
+				heavyFunction();
+				digitalWrite(12,C,OFF);
+				digitalWrite(13,C,OFF);
+				heavyFunction();
+			default:
+				break;
+			}
 		}
+
+	
 	}
 
 	return 0;
@@ -126,7 +129,7 @@ void initPins(void){
 void initSysTick(void){
 	SysTick->LOAD = 0xFFFFFF;
 	SysTick->VAL = 0;
-	SysTick->CTRL |= 0b111;
+	SysTick->CTRL |= 0b101;
 }
 
 /*void buttonHandler(void){
