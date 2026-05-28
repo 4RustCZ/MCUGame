@@ -12,7 +12,8 @@
 
 typedef enum {
 	WAITING,
-	PLAYING
+	SHOWING,
+	ANSWERING,
 }GameState;
 
 void initPins(void);
@@ -21,16 +22,16 @@ void initPins(void);
 void initSysTick(void);
 //void buttonHandler(void);
 int myRandom(int min, int max);
-
+void showSimon(int count, int* array);
 
 unsigned long seed;
 
 
 __attribute__ ((weak)) int main(void)
 {
-	int array[8] = {0,0,0,0,0,0,0,0};
+	int array[25] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 	GameState gameState = WAITING;
-	int simonCount = 0;
+	int simonCount = 9;
 
 	wdog_init(WDOG_CONF_DIS); // this fuh ass thing
 	initPins();
@@ -40,52 +41,26 @@ __attribute__ ((weak)) int main(void)
 		if(gameState==WAITING){
 			if(!(GPIOA->PDIR & (1 << 4))){
 				seed = SysTick->VAL;
-				gameState = PLAYING;
+				gameState = SHOWING;
 			}
 		}
 
-		if(gameState == PLAYING){
-			simonCount = myRandom(1, 4);
+		if(gameState == SHOWING){
+			simonCount++;
 
-			switch (simonCount)
-			{
-			case 1:
-				digitalWrite(8,B,ON);
-				digitalWrite(9,B,ON);
-				heavyFunction();
-				digitalWrite(8,B,OFF);
-				digitalWrite(9,B,OFF);
-				heavyFunction();
-				break;
-			case 2:
-				digitalWrite(10,B,ON);
-				digitalWrite(11,B,ON);
-				heavyFunction();
-				digitalWrite(10,B,OFF);
-				digitalWrite(11,B,OFF);
-				heavyFunction();
-				break;
-			case 3:
-				digitalWrite(10,C,ON);
-				digitalWrite(11,C,ON);
-				heavyFunction();
-				digitalWrite(10,C,OFF);
-				digitalWrite(11,C,OFF);
-				heavyFunction();
-				break;
-			case 4:
-				digitalWrite(12,C,ON);
-				digitalWrite(13,C,ON);
-				heavyFunction();
-				digitalWrite(12,C,OFF);
-				digitalWrite(13,C,OFF);
-				heavyFunction();
-			default:
-				break;
+			for(int i = 0; i < simonCount; i++){
+				array[i] = myRandom(1, 4);
 			}
+
+			showSimon(simonCount, array);
+			
+			gameState = ANSWERING;
 		}
 
-	
+		if(gameState == ANSWERING){
+
+			
+		}	
 	}
 
 	return 0;
@@ -145,4 +120,45 @@ int myRandom(int min, int max){
 	unsigned int n = (unsigned int)(seed /65536);
 
 	return (n % (max - min + 1)) + min;
+}
+
+void showSimon(int count, int* array){
+	for(int i = 0; i < count; i++){
+		switch (array[i])
+		{
+		case 1:
+			digitalWrite(8,B,ON);
+			digitalWrite(9,B,ON);
+			heavyFunction();
+			digitalWrite(8,B,OFF);
+			digitalWrite(9,B,OFF);
+			heavyFunction();
+			break;
+		case 2:
+			digitalWrite(10,B,ON);
+			digitalWrite(11,B,ON);
+			heavyFunction();
+			digitalWrite(10,B,OFF);
+			digitalWrite(11,B,OFF);
+			heavyFunction();
+			break;
+		case 3:
+			digitalWrite(10,C,ON);
+			digitalWrite(11,C,ON);
+			heavyFunction();
+			digitalWrite(10,C,OFF);
+			digitalWrite(11,C,OFF);
+			heavyFunction();
+			break;
+		case 4:
+			digitalWrite(12,C,ON);
+			digitalWrite(13,C,ON);
+			heavyFunction();
+			digitalWrite(12,C,OFF);
+			digitalWrite(13,C,OFF);
+			heavyFunction();
+		default:
+			break;
+		}
+	}
 }
