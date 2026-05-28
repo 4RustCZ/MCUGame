@@ -39,6 +39,9 @@ __attribute__ ((weak)) int main(void)
 
 	while (1) {
 		if(gameState==WAITING){
+			digitalWrite(18,B,ON);
+			digitalWrite(19,B,ON);
+			digitalWrite(1,D,OFF);
 			if(!(GPIOA->PDIR & (1 << 4))){
 				seed = SysTick->VAL;
 				gameState = SHOWING;
@@ -46,6 +49,9 @@ __attribute__ ((weak)) int main(void)
 		}
 
 		if(gameState == SHOWING){
+			digitalWrite(18,B,OFF);
+			digitalWrite(19,B,ON);
+			digitalWrite(1,D,OFF);
 			simonCount++;
 
 			for(int i = 0; i < simonCount; i++){
@@ -58,7 +64,9 @@ __attribute__ ((weak)) int main(void)
 		}
 
 		if(gameState == ANSWERING){
-
+			digitalWrite(18,B,OFF);
+			digitalWrite(19,B,OFF);
+			digitalWrite(1,D,ON);
 			
 		}	
 	}
@@ -67,11 +75,12 @@ __attribute__ ((weak)) int main(void)
 }
 
 void initPins(void){
+	//buttons
 	pinMode(4, A, INPUT);
 	pinMode(5, A, INPUT);
 	pinMode(12, A, INPUT);
 	pinMode(13, A, INPUT);
-
+	//bargraph
 	pinMode(8, B, OUTPUT);
 	pinMode(9, B, OUTPUT);
 	pinMode(10, B, OUTPUT);
@@ -80,7 +89,7 @@ void initPins(void){
 	pinMode(11, C, OUTPUT);
 	pinMode(12, C, OUTPUT);
 	pinMode(13, C, OUTPUT);
-
+	//bargraph off
 	digitalWrite(8, B, OFF);
 	digitalWrite(9, B, OFF);
 	digitalWrite(10, B, OFF);
@@ -89,6 +98,14 @@ void initPins(void){
 	digitalWrite(11, C, OFF);
 	digitalWrite(12, C, OFF);
 	digitalWrite(13, C, OFF);
+	//RGB
+	pinMode(18,B,OUTPUT);
+	pinMode(19,B,OUTPUT);
+	pinMode(1,D,OUTPUT);
+	//RGB OFF
+	digitalWrite(18,B,OFF);
+	digitalWrite(19,B,OFF);
+	digitalWrite(1,D,OFF);
 }
 
 /*void initNVIC(void){
