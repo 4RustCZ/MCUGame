@@ -26,7 +26,6 @@ void initSysTick(void);
 void testHWBG(void);
 int myRandom(int min, int max);
 void showSimon(int count, int* array);
-
 void blink2LEDS(int pin1, Ports port1, int pin2, Ports port2, int count);
 void barGraphScore(int points);
 void barGraphClear(void);
@@ -47,8 +46,8 @@ __attribute__ ((weak)) int main(void)
 	initSysTick();
 	MyRGB_init(&myRGB, 18, B, 19, B, 1, D);
 
-	MyRGB_test(&myRGB);
 	testHWBG();
+	MyRGB_test(&myRGB);
 
 	for(int i = 0; i < MAX_COUNT; i++){
 		array[i] = 0;
@@ -57,6 +56,7 @@ __attribute__ ((weak)) int main(void)
 	while (1) {
 		if(gameState==WAITING){
 			MyRGB_set(&myRGB,ON,ON,OFF);
+			
 			if(digitalRead(4,A)||digitalRead(5,A)||digitalRead(12,A)||digitalRead(13,A)){
 				seed = SysTick->VAL;
 				barGraphClear();
