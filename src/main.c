@@ -10,10 +10,14 @@
 #include "wdog.h"
 #include "littleHelper.h"
 
+#define MAX_COUNT 3
+
 typedef enum {
 	WAITING,
 	SHOWING,
 	ANSWERING,
+	LOST,
+	WON
 }GameState;
 
 void initPins(void);
@@ -23,25 +27,31 @@ void initSysTick(void);
 //void buttonHandler(void);
 int myRandom(int min, int max);
 void showSimon(int count, int* array);
-
+void setRGB(PinState RED, PinState GREEN, PinState BLUE);
+void blinkRGB(PinState R, PinState G, PinState B, int count);
+void blink2LEDS(int pin1, Ports port1, int pin2, Ports port2, int count);
 unsigned long seed;
 
 
 __attribute__ ((weak)) int main(void)
 {
-	int array[25] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+	int array[MAX_COUNT];
 	GameState gameState = WAITING;
-	int simonCount = 9;
+	int simonCount = 0;
+	int correct = 0;
+	unsigned int points = 0;
 
 	wdog_init(WDOG_CONF_DIS); // this fuh ass thing
 	initPins();
 	initSysTick();
 
+	for(int i = 0; i < MAX_COUNT; i++){
+		array[i] = 0;
+	}
+
 	while (1) {
 		if(gameState==WAITING){
-			digitalWrite(18,B,ON);
-			digitalWrite(19,B,ON);
-			digitalWrite(1,D,OFF);
+			setRGB(ON,ON,OFF);
 			if(!(GPIOA->PDIR & (1 << 4))){
 				seed = SysTick->VAL;
 				gameState = SHOWING;
@@ -49,10 +59,13 @@ __attribute__ ((weak)) int main(void)
 		}
 
 		if(gameState == SHOWING){
-			digitalWrite(18,B,OFF);
-			digitalWrite(19,B,ON);
-			digitalWrite(1,D,OFF);
+			setRGB(OFF,ON,OFF);
 			simonCount++;
+
+			if(simonCount > MAX_COUNT){
+				gameState = WON;
+				continue;
+			}
 
 			for(int i = 0; i < simonCount; i++){
 				array[i] = myRandom(1, 4);
@@ -64,11 +77,70 @@ __attribute__ ((weak)) int main(void)
 		}
 
 		if(gameState == ANSWERING){
-			digitalWrite(18,B,OFF);
-			digitalWrite(19,B,OFF);
-			digitalWrite(1,D,ON);
+			setRGB(OFF,OFF,ON);
 			
+			if(!(GPIOA->PDIR & (1 << 4))){
+				if(array[correct] == 1){
+					correct++;
+					blink2LEDS(8,B,9,B,1);
+				}else{
+					correct = 0;
+					gameState = LOST;
+				}
+			}
+
+			if(!(GPIOA->PDIR & (1 << 5))){
+				if(array[correct] == 2){
+					correct++;
+					blink2LEDS(10,B,11,B,1);
+				}else{
+					correct = 0;
+					gameState = LOST;
+				}
+			}
+
+			if(!(GPIOA->PDIR & (1 << 12))){
+				if(array[correct] == 3){
+					correct++;
+					blink2LEDS(10,C,11,C,1);
+				}else{
+					correct = 0;
+					gameState = LOST;
+				}
+			}
+
+			if(!(GPIOA->PDIR & (1 << 13))){
+				if(array[correct] == 4){
+					correct++;
+					blink2LEDS(12,C,13,C,1);
+				}else{
+					correct = 0;
+					gameState = LOST;
+				}
+			}
+
+			if(correct == simonCount){
+				points++;
+				correct = 0;
+				gameState = SHOWING;
+			}
 		}	
+
+		if(gameState == LOST){
+			blinkRGB(ON,OFF,OFF,4);
+
+			simonCount = 0;
+			correct = 0;
+			gameState = WAITING;
+		}
+
+		if(gameState == WON){
+			blinkRGB(ON,ON,ON,4);
+
+			simonCount = 0;
+			correct = 0;
+			gameState = WAITING;
+		}
 	}
 
 	return 0;
@@ -148,38 +220,45 @@ void showSimon(int count, int* array){
 		switch (array[i])
 		{
 		case 1:
-			digitalWrite(8,B,ON);
-			digitalWrite(9,B,ON);
-			heavyFunction();
-			digitalWrite(8,B,OFF);
-			digitalWrite(9,B,OFF);
-			heavyFunction();
+			blink2LEDS(8,B,9,B,1);
 			break;
 		case 2:
-			digitalWrite(10,B,ON);
-			digitalWrite(11,B,ON);
-			heavyFunction();
-			digitalWrite(10,B,OFF);
-			digitalWrite(11,B,OFF);
-			heavyFunction();
+			blink2LEDS(10,B,11,B,1);
 			break;
 		case 3:
-			digitalWrite(10,C,ON);
-			digitalWrite(11,C,ON);
-			heavyFunction();
-			digitalWrite(10,C,OFF);
-			digitalWrite(11,C,OFF);
-			heavyFunction();
+			blink2LEDS(10,C,11,C,1);
 			break;
 		case 4:
-			digitalWrite(12,C,ON);
-			digitalWrite(13,C,ON);
-			heavyFunction();
-			digitalWrite(12,C,OFF);
-			digitalWrite(13,C,OFF);
+			blink2LEDS(12,C,13,C,1);
 			heavyFunction();
 		default:
 			break;
 		}
+	}
+}
+
+void setRGB(PinState RED, PinState GREEN, PinState BLUE){
+	digitalWrite(18,B,RED);
+	digitalWrite(19,B,GREEN);
+	digitalWrite(1,D,BLUE);
+}
+
+void blinkRGB(PinState R, PinState G, PinState B, int count){
+	for(int i = 0; i < count; i++){
+		setRGB(R,G,B);
+		heavyFunction();
+		setRGB(OFF,OFF,OFF);
+		heavyFunction();
+	}
+}
+
+void blink2LEDS(int pin1, Ports port1, int pin2, Ports port2, int count){
+	for(int i = 0; i < count; i++){
+		digitalWrite(pin1,port1,ON);
+		digitalWrite(pin2,port2,ON);
+		heavyFunction();
+		digitalWrite(pin1,port1,OFF);
+		digitalWrite(pin2,port2,OFF);
+		heavyFunction();
 	}
 }
