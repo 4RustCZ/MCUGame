@@ -6,6 +6,7 @@
  *	
  */
 #include "MyArduino.h"
+#include "MyRGB.h"
 #include "MKL25Z4.h"
 #include "wdog.h"
 #include "littleHelper.h"
@@ -23,11 +24,9 @@ typedef enum {
 void initPins(void);
 void initSysTick(void);
 void testHWBG(void);
-void testHWRGB(void);
 int myRandom(int min, int max);
 void showSimon(int count, int* array);
-void setRGB(PinState RED, PinState GREEN, PinState BLUE);
-void blinkRGB(PinState R, PinState G, PinState B, int count);
+
 void blink2LEDS(int pin1, Ports port1, int pin2, Ports port2, int count);
 void barGraphScore(int points);
 void barGraphClear(void);
@@ -36,6 +35,7 @@ unsigned long seed;
 
 __attribute__ ((weak)) int main(void)
 {
+	MyRGB myRGB;
 	int array[MAX_COUNT];
 	GameState gameState = WAITING;
 	int simonCount = 0;
@@ -45,9 +45,10 @@ __attribute__ ((weak)) int main(void)
 	wdog_init(WDOG_CONF_DIS);
 	initPins();
 	initSysTick();
+	MyRGB_init(&myRGB, 18, B, 19, B, 1, D);
 
+	MyRGB_test(&myRGB);
 	testHWBG();
-	testHWRGB();
 
 	for(int i = 0; i < MAX_COUNT; i++){
 		array[i] = 0;
@@ -55,8 +56,8 @@ __attribute__ ((weak)) int main(void)
 
 	while (1) {
 		if(gameState==WAITING){
-			setRGB(ON,ON,OFF);
-			if(!(GPIOA->PDIR & (1 << 4))){
+			MyRGB_set(&myRGB,ON,ON,OFF);
+			if(digitalRead(4,A)||digitalRead(5,A)||digitalRead(12,A)||digitalRead(13,A)){
 				seed = SysTick->VAL;
 				barGraphClear();
 				points=0;
@@ -65,7 +66,7 @@ __attribute__ ((weak)) int main(void)
 		}
 
 		if(gameState == SHOWING){
-			setRGB(OFF,ON,OFF);
+			MyRGB_set(&myRGB,OFF,ON,OFF);
 			simonCount++;
 
 			if(simonCount > MAX_COUNT){
@@ -81,7 +82,7 @@ __attribute__ ((weak)) int main(void)
 		}
 
 		if(gameState == ANSWERING){
-			setRGB(OFF,OFF,ON);
+			MyRGB_set(&myRGB,OFF,OFF,ON);
 			
 			if(digitalRead(4,A)){
 				if(array[correct] == 1){
@@ -132,7 +133,7 @@ __attribute__ ((weak)) int main(void)
 
 		if(gameState == LOST){
 			barGraphScore(points);
-			blinkRGB(ON,OFF,OFF,4);
+			MyRGB_blink(&myRGB,ON,OFF,OFF,4);
 
 			simonCount = 0;
 			correct = 0;
@@ -141,7 +142,7 @@ __attribute__ ((weak)) int main(void)
 
 		if(gameState == WON){
 			barGraphScore(points);
-			blinkRGB(ON,ON,ON,4);
+			MyRGB_blink(&myRGB,ON,ON,ON,4);
 
 			simonCount = 0;
 			correct = 0;
@@ -176,14 +177,6 @@ void initPins(void){
 	digitalWrite(11, C, OFF);
 	digitalWrite(12, C, OFF);
 	digitalWrite(13, C, OFF);
-	//RGB
-	pinMode(18,B,OUTPUT);
-	pinMode(19,B,OUTPUT);
-	pinMode(1,D,OUTPUT);
-	//RGB OFF
-	digitalWrite(18,B,OFF);
-	digitalWrite(19,B,OFF);
-	digitalWrite(1,D,OFF);
 }
 
 void initSysTick(void){
@@ -224,20 +217,8 @@ void showSimon(int count, int* array){
 	}
 }
 
-void setRGB(PinState RED, PinState GREEN, PinState BLUE){
-	digitalWrite(18,B,RED);
-	digitalWrite(19,B,GREEN);
-	digitalWrite(1,D,BLUE);
-}
 
-void blinkRGB(PinState R, PinState G, PinState B, int count){
-	for(int i = 0; i < count; i++){
-		setRGB(R,G,B);
-		myDelay(500);
-		setRGB(OFF,OFF,OFF);
-		myDelay(500);
-	}
-}
+
 
 void blink2LEDS(int pin1, Ports port1, int pin2, Ports port2, int count){
 	for(int i = 0; i < count; i++){
@@ -299,8 +280,3 @@ void testHWBG(void){
 	barGraphClear();
 }
 
-void testHWRGB(void){
-	blinkRGB(ON,OFF,OFF,1);
-	blinkRGB(OFF,ON,OFF,1);
-	blinkRGB(OFF,OFF,ON,1);
-}
