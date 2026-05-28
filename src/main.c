@@ -68,6 +68,10 @@ __attribute__ ((weak)) int main(void)
 
 void initPins(void){
 	pinMode(4, A, INPUT);
+	pinMode(5, A, INPUT);
+	pinMode(12, A, INPUT);
+	pinMode(13, A, INPUT);
+
 	pinMode(8, B, OUTPUT);
 	pinMode(9, B, OUTPUT);
 	pinMode(10, B, OUTPUT);
