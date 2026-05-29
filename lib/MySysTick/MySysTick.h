@@ -1,6 +1,7 @@
 /**
  * @file MySysTick.h
  * @brief Simple SysTick timer configuration helpers.
+ * @authors LowGamik + 4RustCZ
  */
 
 #ifndef MYSYSTICK_H
@@ -8,6 +9,10 @@
 
 /**
  * @brief SysTick configuration parameters.
+ * 
+ * @param maxVal Maximum value of the SysTick counter.
+ * @param currentVal Current value of the SysTick counter.
+ * @param control SysTick control register value.  3 bits, first controls if external or internal processor clock is used. second bit controls if interrupt is enabled. third bit controls if SysTick is enabled.
  */
 typedef struct {
     unsigned int maxVal;

@@ -1,6 +1,7 @@
 /**
  * @file MyArduino.h
  * @brief Arduino-inspired GPIO utilities for the MKL25Z4 MCU.
+ * @authors LowGamik + 4RustCZ
  */
 
 #ifndef MYARDUINO_H

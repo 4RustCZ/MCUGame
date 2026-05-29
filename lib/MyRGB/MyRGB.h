@@ -1,6 +1,7 @@
 /**
  * @file MyRGB.h
  * @brief RGB LED helper functions using MyArduino GPIO wrappers.
+ * @authors LowGamik + 4RustCZ
  */
 
 #ifndef MyRGB_h

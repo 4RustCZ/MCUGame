@@ -1,6 +1,7 @@
 /**
  * @file MyBargraph.h
  * @brief 8-LED bargraph display helpers using MyArduino GPIO wrappers.
+ * @authors LowGamik + 4RustCZ
  */
 
 #ifndef MYBARGRAPH_H

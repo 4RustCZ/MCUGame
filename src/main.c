@@ -1,6 +1,6 @@
 /*
  * 	Name: main.c
- * 	Author: LowGamik + 4RustCZ
+ * 	@authors LowGamik + 4RustCZ
  *
  * 	This is a stub. Write your code here.
  *	
@@ -86,6 +86,7 @@ __attribute__ ((weak)) int main(void)
 			
 			if(digitalRead(4,A)||digitalRead(5,A)||digitalRead(12,A)||digitalRead(13,A)){
 				seed = MySysTick_getVal();
+				MySysTick_stop();
 				MyBargraph_clearALL(&myBargraph);
 				points=0;
 				gameState = SHOWING;
