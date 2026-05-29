@@ -6,6 +6,8 @@ void MyRGB_init(MyRGB *myRGB, int redPin, Ports redPort, int greenPin, Ports gre
     pinMode(greenPin, greenPort, OUTPUT);
     pinMode(bluePin, bluePort, OUTPUT);
 
+    MyRGB_clear(myRGB);
+
     myRGB->redPin = redPin;
     myRGB->redPort = redPort;
     myRGB->greenPin = greenPin;
