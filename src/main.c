@@ -8,6 +8,7 @@
 #include "MyArduino.h"
 #include "MyRGB.h"
 #include "MyBargraph.h"
+#include "MySysTick.h"
 #include "MKL25Z4.h"
 #include "wdog.h"
 #include "littleHelper.h"
@@ -22,10 +23,31 @@ typedef enum {
 	WON
 }GameState;
 
+/**
+ * @file main.c
+ * @brief Simon game implementation for the MKL25Z4 development board.
+ */
+
 void initPins(void);
-void initSysTick(void);
+
+/**
+ * @brief Generate a pseudo-random integer in the defined range.
+ *
+ * @param min Minimum inclusive value.
+ * @param max Maximum inclusive value.
+ * @return Random number between min and max.
+ */
 int myRandom(int min, int max);
+
+/**
+ * @brief Play back the current Simon sequence on the bargraph.
+ *
+ * @param count    Number of sequence steps to show.
+ * @param array    Array containing sequence values.
+ * @param bargraph Bargraph instance used for display.
+ */
 void showSimon(int count, int* array, MyBargraph *bargraph);
+
 unsigned long seed;
 
 MyBargraph_LED leds[8] = {{8,B},{9,B},{10,B},{11,B},{10,C},{11,C},{12,C},{13,C}};
@@ -35,6 +57,7 @@ __attribute__ ((weak)) int main(void)
 {
 	MyRGB myRGB;
 	MyBargraph myBargraph;
+	MySysTick mySysTick = {(unsigned int)(0x7fffffff), 0, 0b100};
 
 	int array[MAX_COUNT];
 	GameState gameState = WAITING;
@@ -44,12 +67,14 @@ __attribute__ ((weak)) int main(void)
 
 	wdog_init(WDOG_CONF_DIS);
 	initPins();
-	initSysTick();
+	MySysTick_init(&mySysTick);
 	MyRGB_init(&myRGB, 18, B, 19, B, 1, D);
 	MyBargraph_init(&myBargraph, leds);
 
 	MyBargraph_testHW(&myBargraph);
 	MyRGB_test(&myRGB);
+
+	MySysTick_start();
 
 	for(int i = 0; i < MAX_COUNT; i++){
 		array[i] = 0;
@@ -60,7 +85,7 @@ __attribute__ ((weak)) int main(void)
 			MyRGB_set(&myRGB,ON,ON,OFF);
 			
 			if(digitalRead(4,A)||digitalRead(5,A)||digitalRead(12,A)||digitalRead(13,A)){
-				seed = SysTick->VAL;
+				seed = MySysTick_getVal();
 				MyBargraph_clearALL(&myBargraph);
 				points=0;
 				gameState = SHOWING;
@@ -163,13 +188,13 @@ void initPins(void){
 	pinMode(13, A, INPUT);
 }
 
-void initSysTick(void){
-	SysTick->LOAD = 0xFFFFFF;
-	SysTick->VAL = 0;
-	SysTick->CTRL |= 0b101;
-}
-
-
+/**
+ * @brief Generate a new pseudo-random value using a linear congruential generator.
+ *
+ * @param min Minimum inclusive value.
+ * @param max Maximum inclusive value.
+ * @return Pseudo-random number between min and max.
+ */
 int myRandom(int min, int max){
 	seed = (seed * 1103515245 + 12345) & 0x7fffffff; // Linear Congruential Generator
 
@@ -178,7 +203,13 @@ int myRandom(int min, int max){
 	return (n % (max - min + 1)) + min;
 }
 
-
+/**
+ * @brief Display the simulated Simon pattern sequence on the bargraph.
+ *
+ * @param count       Number of sequence elements to show.
+ * @param array       Sequence values where each number selects a LED pair.
+ * @param myBargraph  Bargraph instance used for display.
+ */
 void showSimon(int count, int* array, MyBargraph *myBargraph){
 	for(int i = 0; i < count; i++){
 		switch (array[i])
